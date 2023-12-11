@@ -1,5 +1,6 @@
 package com.example.ApiRestPMN.Entity;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -8,6 +9,8 @@ public class Task {
 
     @Id
     private Long id;
+
+    @Nonnull
     private String title;
     private String description;
     private boolean completed;
@@ -22,11 +25,12 @@ public class Task {
         this.id = id;
     }
 
+    @Nonnull
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(@Nonnull String title) {
         this.title = title;
     }
 

@@ -3,6 +3,8 @@ package com.example.ApiRestPMN.Controller;
 import com.example.ApiRestPMN.Entity.Task;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -11,6 +13,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/tasks")
+@Validated
 public class TaskController {
     private static final List<Task> tasks = new ArrayList<>();
     private Long nextId = 1L;
@@ -30,14 +33,20 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> addTask(@RequestBody Task task) {
+    public ResponseEntity<String> addTask(@Validated @RequestBody Task task, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body("Invalid input");
+        }
         task.setId(nextId++);
         tasks.add(task);
-        return ResponseEntity.status(HttpStatus.CREATED).body(task);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Success");
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task updatedTask) {
+    public ResponseEntity<Task> updateTask(@PathVariable Long id,@Validated @RequestBody Task updatedTask,BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(null);
+        }
         Optional<Task> existingTask = findTaskById(id);
         if (existingTask.isPresent()) {
             Task task = existingTask.get();
@@ -66,4 +75,11 @@ public class TaskController {
                 .filter(task -> task.getId().equals(id))
                 .findFirst();
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleValidationException(Exception e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
 }
